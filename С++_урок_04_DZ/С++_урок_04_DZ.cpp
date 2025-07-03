@@ -86,7 +86,22 @@ private:
 	}
 public:
 	MedalsTable(int _max_size) : size{ 0 }, max_size{_max_size} {
-		medalRows = new MedalRow{ max_size };
+		medalRows = new MedalRow[max_size];
+	}
+	MedalsTable(const MedalsTable& other) :size{ other.size }, max_size{ other.max_size } {
+		for (size_t i = 0; i < size; i++)
+		{
+			medalRows[i] = other.medalRows[i];
+		}
+	}
+	MedalsTable(MedalsTable&& other) {
+		size = other.size;
+		max_size = other.max_size;
+		for (size_t i = 0; i < size; i++)
+		{
+			medalRows[i] = other.medalRows[i];
+		}	
+		other.medalRows = nullptr;
 	}
 	~MedalsTable(){
 		delete[] medalRows;
@@ -96,7 +111,7 @@ public:
 		int idx{ findCountry(country) };
 		if (idx == -1)
 		{
-			assert(size < MedalsTable::maxSize and "Table is FULL!");
+			assert(size < MedalsTable::max_size and "Table is FULL!");
 			idx = size++;
 			medalRows[idx].setCountry(country);
 		}
@@ -107,6 +122,11 @@ public:
 		int idx{ findCountry(country) };
 		assert(idx != -1 and "Country not found on const table");
 		return medalRows[idx];
+	}
+	MedalsTable& operator=(const MedalsTable& other) {
+		size = other.size;
+		max_size = other.max_size;
+		medalRows = other.medalRows;
 	}
 	void print()const
 	{
@@ -189,7 +209,7 @@ public:
 
 int main()
 {
-	MedalsTable mt1;
+	MedalsTable mt1(7);
 	std::cout << "Medals table #1:\n";
 	mt1["UKR"][MedalRow::GOLD] = 14;
 	mt1["UKR"][MedalRow::SILVER] = 5;
