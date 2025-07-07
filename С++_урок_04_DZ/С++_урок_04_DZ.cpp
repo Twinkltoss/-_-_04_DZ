@@ -46,17 +46,20 @@ public:
 		assert((idx >= 0 and idx < 3) and "Index out of range!");
 		return medals[idx];
 	}
-	void print()const
-	{
-		cout << '[' << country << "]-( ";
-		for (int i{ 0 }; i < 3; ++i)
-		{
-			cout << medals[i];
-			if (i < 2) { cout << '\t'; }
-		}
-		std::cout << " )\n";
-	}
+	friend ostream& operator<<(ostream& stream, const MedalRow& obj);
+	
 };
+ostream& operator<<(ostream& stream, const MedalRow& obj)
+{
+	stream << '[' << obj.country << "]-( ";
+	for (int i{ 0 }; i < 3; ++i)
+	{
+		stream<< obj.medals[i];
+		if (i < 2) { stream << '\t'; }
+	}
+	stream << " )\n";
+	return stream;
+}
 class MedalsTable
 {
 private:
@@ -128,14 +131,14 @@ public:
 		max_size = other.max_size;
 		medalRows = other.medalRows;
 	}
-	void print()const
-	{
-		for (int i{ 0 }; i < size; ++i)
-		{
-			medalRows[i].print();
-		}
-	}
+	friend ostream& operator<<(ostream& stream, const MedalsTable& obj);
 };
+ostream& operator<<(ostream& stream, const MedalsTable& obj) {
+	for (int i = 0; i < obj.size; i++) {
+		stream << obj.medalRows[i] << "\n";
+	}
+	return stream;
+}
 
 //	Задание 2
 //	Дополните решение из задания 1 перегрузкой оператора помещения в поток(operator<<) для классов MedalRow и MedalsTable, заменив тем самым соответствующие
@@ -210,18 +213,18 @@ public:
 int main()
 {
 	MedalsTable mt1(7);
-	std::cout << "Medals table #1:\n";
+	cout << "Medals table #1:\n";
 	mt1["UKR"][MedalRow::GOLD] = 14;
 	mt1["UKR"][MedalRow::SILVER] = 5;
 	mt1["HUN"][MedalRow::BRONZE] = 9;
 	mt1["HUN"][MedalRow::GOLD] = 7;
 	mt1["POL"][MedalRow::GOLD] = 4;
 	mt1["POL"][MedalRow::SILVER] = 2;
-	mt1.print();
+	cout<<mt1;
 	// создаем константную копию таблицы №1
 	cout << "\nMedals table #2:\n";
 	const MedalsTable mt2{ mt1 };
-	mt2.print();
+	mt2;
 	// раскомментировав следующую строку можно протестировать
 	// проверку отсутствия страны в константной таблице
 	// медалей
