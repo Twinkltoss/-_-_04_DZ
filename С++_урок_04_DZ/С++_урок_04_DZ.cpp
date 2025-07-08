@@ -49,17 +49,7 @@ public:
 	friend ostream& operator<<(ostream& stream, const MedalRow& obj);
 	
 };
-ostream& operator<<(ostream& stream, const MedalRow& obj)
-{
-	stream << '[' << obj.country << "]-( ";
-	for (int i{ 0 }; i < 3; ++i)
-	{
-		stream<< obj.medals[i];
-		if (i < 2) { stream << '\t'; }
-	}
-	stream << " )\n";
-	return stream;
-}
+
 class MedalsTable
 {
 private:
@@ -97,7 +87,7 @@ public:
 			medalRows[i] = other.medalRows[i];
 		}
 	}
-	MedalsTable(MedalsTable&& other) {
+	MedalsTable(MedalsTable&& other)noexcept {
 		size = other.size;
 		max_size = other.max_size;
 		for (size_t i = 0; i < size; i++)
@@ -131,83 +121,113 @@ public:
 		max_size = other.max_size;
 		medalRows = other.medalRows;
 	}
+	int operator ()(const char* country) {
+		const MedalRow& row = (*this)[country];
+		int maxMedal = MedalRow::GOLD;
+		if (row[MedalRow::SILVER] > row[maxMedal]) {
+			maxMedal = MedalRow::SILVER;
+		}
+		if (row[MedalRow::BRONZE] > row[maxMedal]) {
+			maxMedal = MedalRow::BRONZE;
+		}
+		return maxMedal;
+	}
 	friend ostream& operator<<(ostream& stream, const MedalsTable& obj);
 };
+
+
+//	Задание 2
+//	Дополните решение из задания 1 перегрузкой оператора помещения в поток(operator<<) для классов MedalRow и MedalsTable, заменив тем самым соответствующие
+//	функции - члены print() в них.
+ostream& operator<<(ostream& stream, const MedalRow& obj)
+{
+	stream << '[' << obj.country << "]-( ";
+	for (int i{ 0 }; i < 3; ++i)
+	{
+		stream << obj.medals[i];
+		if (i < 2) { stream << '\t'; }
+	}
+	stream << " )\n";
+	return stream;
+}
+
 ostream& operator<<(ostream& stream, const MedalsTable& obj) {
 	for (int i = 0; i < obj.size; i++) {
 		stream << obj.medalRows[i] << "\n";
 	}
 	return stream;
 }
-
-//	Задание 2
-//	Дополните решение из задания 1 перегрузкой оператора помещения в поток(operator<<) для классов MedalRow и MedalsTable, заменив тем самым соответствующие
-//	функции - члены print() в них.
-
  
 //	Задание 3
-//	Дополните решение из задания 2 реализацией оператора вызова функции для класса MedalsTable.
-// Перегрузка должна принимать в качестве аргумента идентификатор
-//	страны и возвращать одну из констант MedalRow::GOLD,
-//	MedalRow::SILVER, MedalRow::BRONZE как константу
-//	соответствующую максимальному количеству медалей
-//	для заданной страны.То есть если, к примеру, у Польши
-//	2 золотые, 4 серебрянных и одна бронзовая медаль, то
-//	перегрузка оператора вызов функции с параметром POL
-//	вернет MedalRow::SILVER.
+	//Дополните решение из задания 2 реализацией оператора вызова функции для класса MedalsTable.
+ //Перегрузка должна принимать в качестве аргумента идентификатор
+	//страны и возвращать одну из констант MedalRow::GOLD,
+	//MedalRow::SILVER, MedalRow::BRONZE как константу
+	//соответствующую максимальному количеству медалей
+	//для заданной страны.То есть если, к примеру, у Польши
+	//2 золотые, 4 серебрянных и одна бронзовая медаль, то
+	//перегрузка оператора вызов функции с параметром POL
+	//вернет MedalRow::SILVER.
  
  
 //	Задание 4
-//	Модифицируйте функтор NoSequence из задания 26,
-//	чтоб он игнорировал не менее N подряд значений, где
-//	N — параметр конструктора данного функтора.
+	//Модифицируйте функтор NoSequence из задания 26,
+	//чтоб он игнорировал не менее N подряд значений, где
+	//N — параметр конструктора данного функтора.
 
-//template <typename T>
-//void print(T* begin, T* end, char delimiter = ' ')
-//{
-//	while (begin != end)
-//	{
-//		cout << *begin++ << delimiter;
-//	}
-//	cout << '\n';
-//}
-//template <typename T, typename Predicate>
-//int copy_if(T* srcB, T* srcE, T* destB, T* destE,Predicate pred)
-//{
-//	int copyCount{ 0 };
-//	while (destB != destE and srcB != srcE)
-//	{
-//		if (pred(*srcB))
-//		{
-//			*destB++ = *srcB;
-//			++copyCount;
-//		}
-//		++srcB;
-//	}
-//	return copyCount;
-//}
-//class NoSequence
-//{
-//	bool init;
-//	int prevEl;
-//public:
-//	NoSequence() : init{ false }, prevEl{ 0 } {}
-//	bool operator()(int el)
-//	{
-//		if (init)
-//		{
-//			bool result{ prevEl != el };
-//			if (result)
-//			{
-//				prevEl = el;
-//			}
-//			return result;
-//		}
-//		init = true;
-//		prevEl = el;
-//		return true;
-//	}
-//};
+template <typename T>
+void print(T* begin, T* end, char delimiter = ' ')
+{
+	while (begin != end)
+	{
+		cout << *begin++ << delimiter;
+	}
+	cout << '\n';
+}
+template <typename T, typename Predicate>
+int copy_if(T* srcB, T* srcE, T* destB, T* destE,Predicate pred)
+{
+	int copyCount{ 0 };
+	while (destB != destE and srcB != srcE)
+	{
+		if (pred(*srcB))
+		{
+			*destB++ = *srcB;
+			++copyCount;
+		}
+		++srcB;
+	}
+	return copyCount;
+}
+class NoSequence
+{
+	bool init;
+	int prevEl;
+	int count;
+	const int n;
+public:
+	NoSequence(int minRepeats) : init{ false }, prevEl{ 0 }, count{ 0 }, n{ minRepeats } {}
+	bool operator()(int el) {
+		if (init) {
+			if (prevEl == el) {
+				count++;  
+				return (count >= N);
+			}
+			else {
+				bool result = (count >= N);  // Возвращаем true, если предыдущая серия завершена
+				prevEl = el;
+				count = 1;  
+				return result;
+			}
+		}
+		else {
+			init = true;
+			prevEl = el;
+			count = 1;
+			return false;
+		}
+	}
+};
 
 
 int main()
